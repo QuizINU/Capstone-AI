@@ -1,4 +1,4 @@
-# app/main.py
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
 import os
@@ -9,6 +9,15 @@ from app.summarize import summarize_text
 from app.generate_quiz import generate_quiz
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 나중에 실제 배포 시 프론트 주소만 명시할 것
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
@@ -18,13 +27,8 @@ async def process_pdf(file: UploadFile = File(...)):
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    # 1. PDF → 텍스트 추출
     text = extract_text_from_pdf(file_path)
-
-    # 2. 요약
     summary = summarize_text(text)
-
-    # 3. 퀴즈 생성
     quiz = generate_quiz(summary)
 
     return JSONResponse({
