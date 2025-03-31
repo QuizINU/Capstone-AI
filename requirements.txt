@@ -1,3 +1,6 @@
 openai
 python-dotenv
 PyMuPDF
+fastapi
+uvicorn
+python-multipart
